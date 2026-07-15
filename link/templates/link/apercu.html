@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ apercu.nom_affichage }} - Carte de Contact</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configure Tailwind for custom colors/font -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-blue': '#1a73e8',
+                        'linkedin-blue': '#0A66C2',
+                        'success-green': '#34A853',
+                        'light-gray-text': '#5f6368',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom styles for the rounded header effect */
+        .card-header {
+            position: relative;
+            height: 300px;
+            overflow: hidden;
+            border-top-left-radius: 1.5rem;
+            border-top-right-radius: 1.5rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .card-header:hover {
+            opacity: 0.9;
+        }
+
+        .background-img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            min-height: 100%;
+            object-fit: cover; 
+        }
+        
+        /* Icon styles matching the screenshot */
+        .icon-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+        .icon-box.email { background-color: #f0f8ff; border: 1px solid #c9e0ff; }
+        .icon-box.phone { background-color: #e5fbe4; border: 1px solid #c9f0c8; }
+        .icon-box.linkedin { background-color: #DCE6F1; border: 1px solid #B0C7E8; }
+        .icon-box.calendly { background-color: #F0F5FE; border: 1px solid #D7E1F9; }
+        .icon-box.default { background-color: #f8f9fa; border: 1px solid #e9ecef; }
+
+        /* SMOKE EFFECT STYLES */
+        .smoke-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 70%),
+                        radial-gradient(circle at 70% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 60%),
+                        radial-gradient(circle at 30% 80%, rgba(255, 255, 255, 0.07) 0%, transparent 65%);
+            opacity: 0.8; 
+            mix-blend-mode: soft-light; 
+            pointer-events: none; 
+        }
+
+        /* LOADING DOTS STYLES */
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
+        }
+
+        .loading-dots {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-dots .dot {
+            width: 8px;
+            height: 8px;
+            background-color: white;
+            border-radius: 50%;
+            margin: 0 4px;
+            display: inline-block;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .loading-dots .dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .loading-dots .dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4 font-sans">
+
+    <!-- Hidden file input for background image -->
+    <input type="file" id="backgroundFileInput" accept="image/*" class="hidden">
+
+    <!-- Contact Card Container -->
+    <div class="w-full max-w-sm bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-200">
+
+        <!-- 1. Header Background Image Area -->
+        <div class="card-header" onclick="document.getElementById('backgroundFileInput').click()">
+            {% if apercu.profil.design and apercu.profil.design.image_fond %}
+                <img id="background-image" class="background-img" src="{{ apercu.profil.design.image_fond.url }}" alt="Image de fond professionnelle">
+            {% else %}
+                <img id="background-image" class="background-img" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=2200&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Image de fond professionnelle par défaut">
+            {% endif %}
+            
+            <div class="smoke-overlay"></div>
+        </div>
+        
+        <!-- Card Content -->
+        <div class="px-6 pt-6 pb-4">
+            <!-- 2. Name, Title, and Company Section -->
+            <div class="flex items-start mb-6">
+                <!-- Profile Photo -->
+                {% if apercu.get_photo %}
+                    <img src="{{ apercu.get_photo.url }}" alt="Photo de profil" class="w-16 h-16 rounded-full mr-4 object-cover border-2 border-gray-200">
+                
+                {% endif %}
+                
+                <div class="flex-1">
+                    <!-- Name and Verification -->
+                    <h1 class="text-xl font-bold text-gray-900 flex items-center mb-1">
+                        {{ apercu.nom_affichage }}
+                        <!-- Verification Checkmark -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="ml-1">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <path d="m9 11 3 3L22 4"/>
+                        </svg>
+                    </h1>
+                    <!-- Title and Status -->
+                    <p class="text-base text-gray-800 font-medium">{{ apercu.profil.statut }}</p>
+                    <p class="text-sm text-gray-500">{{ apercu.profil.nom_profil }}</p>
+                </div>
+            </div>
+
+            <!-- 3. Primary Action Button with Loading Dots -->
+            <button id="saveContactButton" onclick="simulateSaveContact()" class="block w-full text-center py-3 px-6 mb-6 bg-black text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transition duration-300">
+                <span id="buttonText">Sauvegarder le Contact</span>
+                <span id="loadingIndicator" class="loading-dots hidden">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </span>
+            </button>
+
+            <!-- 4. Dynamic Contact Links -->
+            <div class="space-y-4">
+                {% for lien in apercu.get_liens_ordonnes %}
+                    <a href="{{ lien.url }}" class="flex items-center p-2 rounded-xl hover:bg-gray-50 transition duration-300 ease-in-out hover:shadow-lg hover:scale-[1.01] group" target="_blank">
+                        <!-- Dynamic Icon based on lien type -->
+                        <div class="icon-box {% if 'email' in lien.type_lien.lower %}email{% elif 'phone' in lien.type_lien.lower %}phone{% elif 'linkedin' in lien.type_lien.lower %}linkedin{% elif 'meeting' in lien.type_lien.lower or 'calendly' in lien.type_lien.lower %}calendly{% else %}default{% endif %} mr-4">
+                            {% if 'email' in lien.type_lien.lower %}
+                                <!-- Email Icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                                </svg>
+                            {% elif 'phone' in lien.type_lien.lower %}
+                                <!-- Phone Icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34A853" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                                </svg>
+                            {% elif 'linkedin' in lien.type_lien.lower %}
+                                <!-- LinkedIn Icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0A66C2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="fill-current">
+                                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
+                                </svg>
+                            {% elif 'meeting' in lien.type_lien.lower or 'calendly' in lien.type_lien.lower %}
+                                <!-- Calendar Icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                                </svg>
+                            {% else %}
+                                <!-- Default Link Icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                                </svg>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <p class="text-base font-semibold text-gray-800">{{ lien.titre }}</p>
+                            <p class="text-sm text-light-gray-text">
+                                {% if lien.type_lien %}
+                                    {{ lien.type_lien }}
+                                {% else %}
+                                    Cliquez pour visiter
+                                {% endif %}
+                            </p>
+                        </div>
+                    </a>
+                {% empty %}
+                    <div class="text-center py-4">
+                        <p class="text-gray-500 italic">Aucun lien disponible pour le moment</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- FOOTER: Subtle branding and copyright section -->
+        <div class="bg-gray-50 px-6 py-4 text-center border-t border-gray-100">
+            <p class="text-xs text-gray-500 font-medium">© {% now "Y" %} {{ apercu.nom_affichage }} | Carte Digitale</p>
+            <p class="text-xs text-gray-400 mt-1">
+                Propulsé par <span class="text-primary-blue font-semibold">vCard Pro</span>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('backgroundFileInput').addEventListener('change', handleBackgroundUpload);
+
+        function handleBackgroundUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const backgroundImage = document.getElementById('background-image');
+                    backgroundImage.src = e.target.result;
+                    backgroundImage.alt = "Image de fond personnalisée";
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Function to simulate saving contact and show loading dots
+        function simulateSaveContact() {
+            const buttonText = document.getElementById('buttonText');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const button = document.getElementById('saveContactButton');
+            
+            const originalText = buttonText.textContent;
+            
+            // 1. Show loading state
+            buttonText.classList.add('hidden');
+            loadingIndicator.classList.remove('hidden');
+            button.disabled = true;
+            
+            // 2. Simulate network delay (2 seconds)
+            setTimeout(() => {
+                // 3. Hide loading state and reset button
+                loadingIndicator.classList.add('hidden');
+                buttonText.classList.remove('hidden');
+                button.disabled = false;
+                
+                // 4. Briefly show 'Sauvegardé!' feedback
+                buttonText.textContent = 'Sauvegardé!';
+                button.classList.remove('bg-black');
+                button.classList.add('bg-success-green');
+
+                setTimeout(() => {
+                     // 5. Reset to original state
+                     buttonText.textContent = originalText;
+                     button.classList.remove('bg-success-green');
+                     button.classList.add('bg-black');
+                }, 1500);
+
+            }, 2000); 
+        }
+    </script>
+</body>
+</html>

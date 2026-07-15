@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Liens </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .links-container {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .no-links {
+            text-align: center;
+            padding: 40px 20px;
+            color: #7f8c8d;
+        }
+        
+        .no-links h3 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        
+        .no-links p {
+            margin-bottom: 25px;
+            color: #95a5a6;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid #3498db;
+            color: #3498db;
+        }
+        
+        .btn-outline:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .links-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .link-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s;
+            cursor: move;
+        }
+        
+        .link-item:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transform: translateY(-2px);
+        }
+        
+        .link-item.dragging {
+            opacity: 0.5;
+            background-color: #e9ecef;
+        }
+        
+        .link-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 20px;
+            color: white;
+        }
+        
+        .link-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .link-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .link-url {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            word-break: break-all;
+        }
+        
+        .link-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .btn-edit {
+            background-color: #f39c12;
+        }
+        
+        .btn-edit:hover {
+            background-color: #e67e22;
+        }
+        
+        .btn-delete {
+            background-color: #e74c3c;
+        }
+        
+        .btn-delete:hover {
+            background-color: #c0392b;
+        }
+        
+        .form-container {
+            background-color: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+            border: 1px solid #e9ecef;
+        }
+        
+        .form-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+        
+        .btn-cancel {
+            background-color: #95a5a6;
+            color: white;
+        }
+        
+        .btn-cancel:hover {
+            background-color: #7f8c8d;
+        }
+        
+        .social-preview {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .social-preview-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+        }
+        
+        .social-preview-text {
+            flex: 1;
+        }
+        
+        .social-preview-title {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .social-preview-url {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            opacity: 0.8;
+        }
+        
+        /* Couleurs des réseaux sociaux */
+        .facebook { background-color: #3b5998; }
+        .twitter { background-color: #1da1f2; }
+        .instagram { background-color: #e1306c; }
+        .linkedin { background-color: #0077b5; }
+        .youtube { background-color: #ff0000; }
+        .tiktok { background-color: #000000; }
+        .whatsapp { background-color: #25d366; }
+        .pinterest { background-color: #bd081c; }
+        .snapchat { background-color: #fffc00; color: #000; }
+        .reddit { background-color: #ff4500; }
+        .discord { background-color: #7289da; }
+        .telegram { background-color: #0088cc; }
+        .github { background-color: #333; }
+        .default { background-color: #3498db; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            
+            <p>Gérez vos liens et réseaux sociaux en un seul endroit</p>
+        </div>
+        
+        <div class="links-container">
+            <div class="section-title">
+                <span>Mes Liens</span>
+                <button class="btn btn-primary" onclick="showAddLinkForm()">
+                    <i class="fas fa-plus"></i> Ajouter un lien
+                </button>
+            </div>
+            
+            <div id="noLinksMessage" class="no-links">
+                <h3>Aucun lien à afficher</h3>
+                <p>Commencez par ajouter votre premier lien</p>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="showAddLinkForm()">
+                        <i class="fas fa-plus"></i> Ajouter un lien
+                    </button>
+                </div>
+            </div>
+            
+            <div id="linksList" class="links-list" style="display: none;">
+                <!-- Les liens seront ajoutés dynamiquement ici -->
+            </div>
+            
+            <div id="addLinkForm" class="form-container">
+                <h3 class="form-title" id="formTitle">
+                    <i class="fas fa-plus-circle"></i> Ajouter un nouveau lien
+                </h3>
+                
+                <div class="form-group">
+                    <label for="linkTitle">Titre du lien</label>
+                    <input type="text" id="linkTitle" class="form-control" placeholder="Ex: Mon Instagram" maxlength="100">
+                </div>
+                
+                <div class="form-group">
+                    <label for="linkUrl">URL</label>
+                    <input type="url" id="linkUrl" class="form-control" placeholder="https://..." oninput="updateSocialPreview()">
+                </div>
+                
+                <div id="socialPreview" class="social-preview" style="display: none;">
+                    <div id="previewLogo" class="social-preview-logo default">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <div class="social-preview-text">
+                        <div id="previewTitle" class="social-preview-title">Titre du lien</div>
+                        <div id="previewUrl" class="social-preview-url">URL du lien</div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="linkType">Type de lien</label>
+                        <input type="text" id="linkType" class="form-control" placeholder="Ex: Réseau social" maxlength="100">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="linkOrder">Ordre d'affichage</label>
+                        <input type="number" id="linkOrder" class="form-control" min="1" value="1">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="linkGroup">Groupe</label>
+                    <select id="linkGroup" class="form-control">
+                        <option value="1">Groupe Principal</option>
+                        <option value="2">Réseaux Sociaux</option>
+                        <option value="3">Ressources</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="linkActive" checked>
+                        Lien actif
+                    </label>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn btn-cancel" onclick="hideAddLinkForm()">
+                        <i class="fas fa-times"></i> Annuler
+                    </button>
+                    <button class="btn btn-primary" onclick="saveLink()">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            
+        </div>
+    </div>
+
+    <script>
+        // Données de démonstration
+        let links = [];
+        let editingLinkId = null;
+        let draggedItem = null;
+        
+        // Mapping des réseaux sociaux avec leurs logos
+        const socialNetworks = {
+            'facebook.com': { name: 'Facebook', icon: 'fab fa-facebook-f', color: 'facebook' },
+            'twitter.com': { name: 'Twitter', icon: 'fab fa-twitter', color: 'twitter' },
+            'x.com': { name: 'X', icon: 'fab fa-twitter', color: 'twitter' },
+            'instagram.com': { name: 'Instagram', icon: 'fab fa-instagram', color: 'instagram' },
+            'linkedin.com': { name: 'LinkedIn', icon: 'fab fa-linkedin-in', color: 'linkedin' },
+            'youtube.com': { name: 'YouTube', icon: 'fab fa-youtube', color: 'youtube' },
+            'tiktok.com': { name: 'TikTok', icon: 'fab fa-tiktok', color: 'tiktok' },
+            'whatsapp.com': { name: 'WhatsApp', icon: 'fab fa-whatsapp', color: 'whatsapp' },
+            'pinterest.com': { name: 'Pinterest', icon: 'fab fa-pinterest-p', color: 'pinterest' },
+            'snapchat.com': { name: 'Snapchat', icon: 'fab fa-snapchat-ghost', color: 'snapchat' },
+            'reddit.com': { name: 'Reddit', icon: 'fab fa-reddit-alien', color: 'reddit' },
+            'discord.com': { name: 'Discord', icon: 'fab fa-discord', color: 'discord' },
+            'discord.gg': { name: 'Discord', icon: 'fab fa-discord', color: 'discord' },
+            'telegram.org': { name: 'Telegram', icon: 'fab fa-telegram', color: 'telegram' },
+            't.me': { name: 'Telegram', icon: 'fab fa-telegram', color: 'telegram' },
+            'github.com': { name: 'GitHub', icon: 'fab fa-github', color: 'github' }
+        };
+        
+        // Détecter le réseau social à partir de l'URL
+        function detectSocialNetwork(url) {
+            try {
+                const domain = new URL(url).hostname.replace('www.', '');
+                for (const [key, value] of Object.entries(socialNetworks)) {
+                    if (domain.includes(key)) {
+                        return value;
+                    }
+                }
+            } catch (e) {
+                // URL invalide
+            }
+            return { name: 'Lien', icon: 'fas fa-link', color: 'default' };
+        }
+        
+        // Mettre à jour l'aperçu du réseau social
+        function updateSocialPreview() {
+            const url = document.getElementById('linkUrl').value;
+            const title = document.getElementById('linkTitle').value || 'Titre du lien';
+            
+            if (url) {
+                const social = detectSocialNetwork(url);
+                document.getElementById('previewLogo').className = `social-preview-logo ${social.color}`;
+                document.getElementById('previewLogo').innerHTML = `<i class="${social.icon}"></i>`;
+                document.getElementById('previewTitle').textContent = title;
+                document.getElementById('previewUrl').textContent = url;
+                document.getElementById('socialPreview').style.display = 'flex';
+            } else {
+                document.getElementById('socialPreview').style.display = 'none';
+            }
+        }
+        
+        // Afficher le formulaire d'ajout de lien
+        function showAddLinkForm() {
+            document.getElementById('noLinksMessage').style.display = 'none';
+            document.getElementById('linksList').style.display = 'none';
+            document.getElementById('addLinkForm').style.display = 'block';
+            document.getElementById('formTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Ajouter un nouveau lien';
+            
+            // Réinitialiser le formulaire
+            document.getElementById('linkTitle').value = '';
+            document.getElementById('linkUrl').value = '';
+            document.getElementById('linkType').value = '';
+            document.getElementById('linkOrder').value = links.length + 1;
+            document.getElementById('linkGroup').value = '1';
+            document.getElementById('linkActive').checked = true;
+            document.getElementById('socialPreview').style.display = 'none';
+            
+            editingLinkId = null;
+        }
+        
+        // Masquer le formulaire
+        function hideAddLinkForm() {
+            document.getElementById('addLinkForm').style.display = 'none';
+            
+            if (links.length > 0) {
+                document.getElementById('linksList').style.display = 'flex';
+            } else {
+                document.getElementById('noLinksMessage').style.display = 'block';
+            }
+        }
+        
+        // Sauvegarder un lien
+        function saveLink() {
+            const title = document.getElementById('linkTitle').value;
+            const url = document.getElementById('linkUrl').value;
+            const type = document.getElementById('linkType').value;
+            const order = parseInt(document.getElementById('linkOrder').value);
+            const group = document.getElementById('linkGroup').value;
+            const active = document.getElementById('linkActive').checked;
+            
+            if (!title || !url || !type || !order) {
+                alert('Veuillez remplir tous les champs obligatoires');
+                return;
+            }
+            
+            if (editingLinkId !== null) {
+                // Modifier un lien existant
+                const linkIndex = links.findIndex(link => link.id === editingLinkId);
+                if (linkIndex !== -1) {
+                    links[linkIndex] = {
+                        id: editingLinkId,
+                        titre: title,
+                        url: url,
+                        type_lien: type,
+                        ordre_affichage: order,
+                        groupe: group,
+                        est_actif: active
+                    };
+                }
+            } else {
+                // Ajouter un nouveau lien
+                const newLink = {
+                    id: links.length > 0 ? Math.max(...links.map(link => link.id)) + 1 : 1,
+                    titre: title,
+                    url: url,
+                    type_lien: type,
+                    ordre_affichage: order,
+                    groupe: group,
+                    est_actif: active
+                };
+                
+                links.push(newLink);
+            }
+            
+            // Mettre à jour l'affichage
+            updateLinksDisplay();
+            hideAddLinkForm();
+        }
+        
+        // Modifier un lien
+        function editLink(id) {
+            const link = links.find(link => link.id === id);
+            if (link) {
+                document.getElementById('linkTitle').value = link.titre;
+                document.getElementById('linkUrl').value = link.url;
+                document.getElementById('linkType').value = link.type_lien;
+                document.getElementById('linkOrder').value = link.ordre_affichage;
+                document.getElementById('linkGroup').value = link.groupe;
+                document.getElementById('linkActive').checked = link.est_actif;
+                
+                document.getElementById('formTitle').innerHTML = '<i class="fas fa-edit"></i> Modifier le lien';
+                document.getElementById('addLinkForm').style.display = 'block';
+                document.getElementById('linksList').style.display = 'none';
+                
+                updateSocialPreview();
+                editingLinkId = id;
+            }
+        }
+        
+        // Supprimer un lien
+        function deleteLink(id) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce lien ?')) {
+                links = links.filter(link => link.id !== id);
+                updateLinksDisplay();
+            }
+        }
+        
+        // Mettre à jour l'affichage des liens
+        function updateLinksDisplay() {
+            const linksList = document.getElementById('linksList');
+            linksList.innerHTML = '';
+            
+            if (links.length === 0) {
+                document.getElementById('noLinksMessage').style.display = 'block';
+                document.getElementById('linksList').style.display = 'none';
+                return;
+            }
+            
+            // Trier les liens par ordre d'affichage
+            links.sort((a, b) => a.ordre_affichage - b.ordre_affichage);
+            
+            // Ajouter chaque lien à la liste
+            links.forEach(link => {
+                const social = detectSocialNetwork(link.url);
+                
+                const linkItem = document.createElement('div');
+                linkItem.className = 'link-item';
+                linkItem.draggable = true;
+                linkItem.dataset.id = link.id;
+                
+                linkItem.innerHTML = `
+                    <div class="link-logo ${social.color}">
+                        <i class="${social.icon}"></i>
+                    </div>
+                    <div class="link-content">
+                        <div class="link-title">${link.titre}</div>
+                        <div class="link-url">${link.url}</div>
+                    </div>
+                    <div class="link-actions">
+                        <button class="btn-icon btn-edit" onclick="editLink(${link.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-icon btn-delete" onclick="deleteLink(${link.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                // Événements de glisser-déposer
+                linkItem.addEventListener('dragstart', handleDragStart);
+                linkItem.addEventListener('dragover', handleDragOver);
+                linkItem.addEventListener('drop', handleDrop);
+                linkItem.addEventListener('dragend', handleDragEnd);
+                
+                linksList.appendChild(linkItem);
+            });
+            
+            document.getElementById('noLinksMessage').style.display = 'none';
+            document.getElementById('linksList').style.display = 'flex';
+        }
+        
+        // Gestion du glisser-déposer
+        function handleDragStart(e) {
+            draggedItem = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+        }
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+        
+        function handleDrop(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            
+            if (draggedItem !== this) {
+                // Échanger les positions dans le tableau
+                const draggedId = parseInt(draggedItem.dataset.id);
+                const targetId = parseInt(this.dataset.id);
+                
+                const draggedIndex = links.findIndex(link => link.id === draggedId);
+                const targetIndex = links.findIndex(link => link.id === targetId);
+                
+                // Échanger les ordres d'affichage
+                const tempOrder = links[draggedIndex].ordre_affichage;
+                links[draggedIndex].ordre_affichage = links[targetIndex].ordre_affichage;
+                links[targetIndex].ordre_affichage = tempOrder;
+                
+                // Mettre à jour l'affichage
+                updateLinksDisplay();
+            }
+            
+            return false;
+        }
+        
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+        }
+        
+        // Initialiser l'interface
+        updateLinksDisplay();
+        
+        // Ajouter quelques exemples de liens
+        setTimeout(() => {
+            if (links.length === 0) {
+                links = [
+                    {
+                        id: 1,
+                        titre: "Mon Facebook",
+                        url: "https://facebook.com/monprofil",
+                        type_lien: "Réseau social",
+                        ordre_affichage: 1,
+                        groupe: "2",
+                        est_actif: true
+                    },
+                    {
+                        id: 2,
+                        titre: "Mon Instagram",
+                        url: "https://instagram.com/moncompte",
+                        type_lien: "Réseau social",
+                        ordre_affichage: 2,
+                        groupe: "2",
+                        est_actif: true
+                    },
+                    {
+                        id: 3,
+                        titre: "Mon Site Web",
+                        url: "https://monsite.com",
+                        type_lien: "Site web",
+                        ordre_affichage: 3,
+                        groupe: "1",
+                        est_actif: true
+                    }
+                ];
+                updateLinksDisplay();
+            }
+        }, 500);
+    </script>
+</body>
+</html>

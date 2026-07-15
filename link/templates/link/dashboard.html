@@ -1,0 +1,2595 @@
+<!DOCTYPE html>
+<html lang="fr">                             
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkApp - Dashboard</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ===== STYLES DE LA CARTE DE CONTACT ===== */
+        /* Custom styles for the rounded header effect */
+        .card-header {
+            position: relative;
+            height: 300px;
+            overflow: hidden;
+            border-top-left-radius: 1.5rem;
+            border-top-right-radius: 1.5rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .card-header:hover {
+            opacity: 0.9;
+        }
+
+        .background-img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            min-height: 100%;
+            object-fit: cover; 
+        }
+        
+        /* Icon styles matching the screenshot */
+        .icon-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+        .icon-box.email { background-color: #f0f8ff; border: 1px solid #c9e0ff; }
+        .icon-box.phone { background-color: #e5fbe4; border: 1px solid #c9f0c8; }
+        .icon-box.linkedin { background-color: #DCE6F1; border: 1px solid #B0C7E8; }
+        .icon-box.calendly { background-color: #F0F5FE; border: 1px solid #D7E1F9; }
+        .icon-box.default { background-color: #f8f9fa; border: 1px solid #e9ecef; }
+
+        /* SMOKE EFFECT STYLES */
+        .smoke-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 70%),
+                        radial-gradient(circle at 70% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 60%),
+                        radial-gradient(circle at 30% 80%, rgba(255, 255, 255, 0.07) 0%, transparent 65%);
+            opacity: 0.8; 
+            mix-blend-mode: soft-light; 
+            pointer-events: none; 
+        }
+
+        /* LOADING DOTS STYLES */
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
+        }
+
+        .loading-dots {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-dots .dot {
+            width: 8px;
+            height: 8px;
+            background-color: white;
+            border-radius: 50%;
+            margin: 0 4px;
+            display: inline-block;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .loading-dots .dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .loading-dots .dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        /* Styles pour la carte de contact */
+        .contact-card {
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 1px solid #e9ecef;
+            margin: 0 auto;
+        }
+
+        .contact-card-content {
+            padding: 24px;
+        }
+
+        .contact-header {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .contact-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            margin-right: 16px;
+            object-fit: cover;
+            border: 2px solid #e9ecef;
+        }
+
+        .contact-info {
+            flex: 1;
+        }
+
+        .contact-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .contact-title {
+            font-size: 16px;
+            color: #1a1a1a;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .contact-company {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .contact-button {
+            display: block;
+            width: 100%;
+            text-align: center;
+            padding: 12px 24px;
+            margin-bottom: 24px;
+            background: #000;
+            color: white;
+            font-weight: 600;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .contact-button:hover {
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            transform: translateY(-1px);
+        }
+
+        .contact-links {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .contact-link {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            border-radius: 12px;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .contact-link:hover {
+            background: #f8f9fa;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transform: scale(1.01);
+        }
+
+        .link-info {
+            flex: 1;
+        }
+
+        .link-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .link-type {
+            font-size: 14px;
+            color: #5f6368;
+        }
+
+        .contact-footer {
+            background: #f8f9fa;
+            padding: 16px 24px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .footer-text {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .footer-brand {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        /* ===== STYLES DU DASHBOARD ===== */
+        #qrcode{
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            flex-direction:column;
+            margin-top:20px;
+        }
+        .code{
+           text-align: center;
+           border: 3px solid #ccc; 
+            padding: 10px;
+            width: 200%; 
+            max-width: 400px; 
+            border-radius: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        button{
+            background-color: #6C63FF;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        input{
+            width:50;
+            padding: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        #copie{
+            background-color: #6C63FF;
+            color:white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer; 
+        }
+        #down{
+            background-color: blue;
+            color:white ;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;   
+        }
+        #lienQR{
+            margin-top:10px;
+            font-size:14px;
+            color:red;
+        }
+
+        /* Styles améliorés pour la section Partager */
+        .share-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .share-input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .share-input-group input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px;
+            font-size: 16px;
+        }
+
+        .share-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .share-actions button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .qrcode-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            background: #f9f9f9;
+        }
+
+        .copy-feedback {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .copy-feedback.show {
+            transform: translateX(0);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .share-input-group {
+                flex-direction: column;
+            }
+            
+            .share-input-group input {
+                width: 100%;
+            }
+            
+            .share-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .share-actions button {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            #qrcode {
+                transform: scale(0.8);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .share-section {
+                padding: 1rem;
+            }
+            
+            .qrcode-container {
+                padding: 10px;
+            }
+        }
+
+        :root {
+            --primary: #6C63FF;
+            --secondary: #FF6584;
+            --dark: #2c3e50;
+            --light: #f8f9fa;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: var(--light);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .nav-links a:hover {
+            background: #f0f0f0;
+        }
+
+        .nav-links a.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+        }
+
+        /* Menu de déconnexion */
+        .logout-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 10px;
+            min-width: 180px;
+            z-index: 1000;
+            display: none;
+            margin-top: 10px;
+        }
+
+        .logout-menu.show {
+            display: block;
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 10px 15px;
+            border: none;
+            background: none;
+            color: #e74c3c;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            background: #ffeaea;
+        }
+
+        /* Menu hamburger pour mobile */
+        .hamburger-menu {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 4px;
+        }
+
+        .hamburger-menu span {
+            width: 25px;
+            height: 3px;
+            background: var(--primary);
+            transition: var(--transition);
+        }
+
+        .mobile-nav {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 80%;
+            height: 100vh;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            z-index: 1001;
+            transition: var(--transition);
+            padding: 2rem 1rem;
+            overflow-y: auto;
+        }
+
+        .mobile-nav.active {
+            left: 0;
+        }
+
+        .mobile-nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .mobile-nav-links {
+            list-style: none;
+        }
+
+        .mobile-nav-links li {
+            margin-bottom: 1rem;
+        }
+
+        .mobile-nav-links a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            text-decoration: none;
+            color: #333;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .mobile-nav-links a:hover,
+        .mobile-nav-links a.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .close-menu {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #333;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* Main Content */
+        .dashboard {
+            padding: 2rem 0;
+            flex: 1;
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .dashboard-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .action-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+            text-decoration: none;
+            color: inherit;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .action-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        /* Section Content */
+        .section-content {
+            display: none;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .section-content.active {
+            display: block;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 0.5rem;
+        }
+
+        /* Profil Section Styles */
+        .profil-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .profil-header {
+            background: linear-gradient(135deg, var(--primary), #8a84ff);
+            color: black;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .profil-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: white;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 2.5rem;
+            font-weight: bold;
+            border: 4px solid rgba(255,255,255,0.3);
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .profil-avatar:hover::after {
+            content: '📷 Changer';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: white;
+        }
+
+        .avatar-upload {
+            display: none;
+        }
+
+        .profil-url {
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+            opacity: 0.9;
+            font-family: monospace;
+        }
+
+        .profil-content {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.1);
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .btn:hover {
+            background: #5a52d5;
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .info-value {
+            color: #333;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .status-badge i {
+            margin-right: 0.4rem;
+        }
+
+        .divider {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 1.5rem 0;
+        }
+
+        .alias-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .alias-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .alias-value {
+            background: #f5f5f5;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-family: monospace;
+        }
+
+        .message {
+            padding: 0.75rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .message.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+
+        .message.error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 70px 0 20px;
+            margin-top: auto;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-column h3 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .footer-column h3:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--secondary);
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a {
+            color: #bdc3c7;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+        
+        .footer-links a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+        
+        .footer-links i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            text-decoration: none;
+            color: white;
+        }
+        
+        .social-link:hover {
+            background: var(--secondary);
+            transform: translateY(-3px);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #bdc3c7;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hamburger-menu {
+                display: flex;
+            }
+            
+            .stats,
+            .actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+
+        /* Styles pour la gestion des liens */
+        .links-container {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .links-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .no-links {
+            text-align: center;
+            padding: 40px 20px;
+            color: #7f8c8d;
+        }
+        
+        .no-links h3 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        
+        .no-links p {
+            margin-bottom: 25px;
+            color: #95a5a6;
+        }
+        
+        .links-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            justify-content: center;
+        }
+        
+        .links-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .links-btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .links-btn-primary:hover {
+            background-color: #5a52d5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .links-btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .links-btn-outline:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .links-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .link-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s;
+            cursor: move;
+        }
+        
+        .link-item:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transform: translateY(-2px);
+        }
+        
+        .link-item.dragging {
+            opacity: 0.5;
+            background-color: #e9ecef;
+        }
+        
+        .link-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 20px;
+            color: white;
+        }
+        
+        .link-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .link-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .link-url {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            word-break: break-all;
+        }
+        
+        .link-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .btn-edit {
+            background-color: #f39c12;
+        }
+        
+        .btn-edit:hover {
+            background-color: #e67e22;
+        }
+        
+        .btn-delete {
+            background-color: #e74c3c;
+        }
+        
+        .btn-delete:hover {
+            background-color: #c0392b;
+        }
+        
+        .form-container {
+            background-color: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+            border: 1px solid #e9ecef;
+        }
+        
+        .form-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .links-form-group {
+            margin-bottom: 20px;
+        }
+        
+        .links-form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .links-form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+        
+        .links-form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+        }
+        
+        .links-form-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .links-form-row .links-form-group {
+            flex: 1;
+        }
+        
+        .links-form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+        
+        .links-btn-cancel {
+            background-color: #95a5a6;
+            color: white;
+        }
+        
+        .links-btn-cancel:hover {
+            background-color: #7f8c8d;
+        }
+        
+        .social-preview {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .social-preview-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+        }
+        
+        .social-preview-text {
+            flex: 1;
+        }
+        
+        .social-preview-title {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .social-preview-url {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        /* Couleurs des réseaux sociaux */
+        .facebook { background-color: #3b5998; }
+        .twitter { background-color: #1da1f2; }
+        .instagram { background-color: #e1306c; }
+        .linkedin { background-color: #0077b5; }
+        .youtube { background-color: #ff0000; }
+        .tiktok { background-color: #000000; }
+        .whatsapp { background-color: #25d366; }
+        .pinterest { background-color: #bd081c; }
+        .snapchat { background-color: #fffc00; color: #000; }
+        .reddit { background-color: #ff4500; }
+        .discord { background-color: #7289da; }
+        .telegram { background-color: #0088cc; }
+        .github { background-color: #333; }
+        .gmail { background-color: #d14836; }
+        .phone { background-color: #25d366; }
+        .default { background-color: var(--primary); }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Overlay pour le menu mobile -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Menu de navigation mobile -->
+    <div class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-header">
+            <div class="logo">
+                <i class="fas fa-link" style="margin-right: 0.2em;"></i>
+                LinkApp
+            </div>
+            <button class="close-menu" id="closeMenu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <ul class="mobile-nav-links">
+            <li><a href="#" class="mobile-nav-link" data-section="profil"><i class="fas fa-user" style="margin-right: 0.5em;"></i>Profil</a></li>
+            <li><a href="#" class="mobile-nav-link" data-section="liens"><i class="fas fa-link" style="margin-right: 0.5em;"></i>Liens</a></li>
+            <li><a href="#" class="mobile-nav-link" data-section="partager"><i class="fas fa-share-alt" style="margin-right: 0.5em;"></i>Partager</a></li>
+            <li><a href="#" class="mobile-nav-link" data-section="apercu"><i class="fas fa-eye" style="margin-right: 0.5em;"></i>Aperçu</a></li>
+        </ul>
+    </div>
+
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo">
+                    <i class="fas fa-link" style="margin-right: 0.2em;"></i>
+                    LinkApp
+                </div>
+                
+                <!-- Menu hamburger pour mobile -->
+                <div class="hamburger-menu" id="hamburgerMenu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+
+                <ul class="nav-links">
+                    <li><a href="#" class="nav-link" data-section="profil"><i class="fas fa-user" style="margin-right: 0.5em;"></i>Profil</a></li>
+                    <li><a href="#" class="nav-link" data-section="liens"><i class="fas fa-link" style="margin-right: 0.5em;"></i>Liens</a></li>
+                    <li><a href="#" class="nav-link" data-section="partager"><i class="fas fa-share-alt" style="margin-right: 0.5em;"></i>Partager</a></li>
+                    <li><a href="#" class="nav-link" data-section="apercu"><i class="fas fa-eye" style="margin-right: 0.5em;"></i>Aperçu</a></li>
+                </ul>
+                
+                <div class="user-menu">
+                    <div class="user-avatar" id="user-avatar">
+                        {% if user.is_authenticated and user.prenom %}
+                            {{ user.prenom|first|upper }}
+                        {% else %}
+                            <i class="fas fa-user"></i>
+                        {% endif %}
+                    </div>
+                    <!-- Menu de déconnexion -->
+                    <div class="logout-menu" id="logoutMenu">
+                        <button class="logout-btn" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                           Se déconnecter
+                        </button>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container dashboard">
+        <div id="dashboard" class="section-content active">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Tableau de Bord</h1>
+                <p>Bienvenue sur votre espace LinkApp <em>{% if user.is_authenticated and user.prenom %}, {{ user.prenom }}{% endif %}</em></p>
+            </div>
+
+            <div class="actions">
+                <div class="action-card" data-section="profil">
+                    <div class="action-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h3>Gérer le Profil</h3>
+                    <p>Modifiez vos informations personnelles</p>
+                </div>
+
+                <div class="action-card" data-section="liens">
+                    <div class="action-icon">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <h3>Ajouter des Liens</h3>
+                    <p>Connectez vos réseaux sociaux</p>
+                </div>
+
+                <div class="action-card" data-section="design">
+                    <div class="action-icon">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                    <h3>Personnaliser</h3>
+                    <p>Adaptez l'apparence</p>
+                </div>
+
+                <div class="action-card" data-section="partager">
+                    <div class="action-icon">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <h3>Partager</h3>
+                    <p>Partagez votre profil</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Profil -->
+        <div id="profil" class="section-content">
+            <div class="message" id="message"></div>
+            
+            <div class="profil-container">
+                <div class="profil-header">
+                    <input type="file" id="avatar-upload" class="avatar-upload" accept="image/*">
+                    <div class="profil-avatar" id="profil-avatar">
+                        {% if user.is_authenticated and user.prenom %}
+                            {{ user.prenom|first|upper }}
+                        {% else %}
+                            <i class="fas fa-user"></i>
+                        {% endif %}
+                    </div>
+                    <h1 id="profil-nom">
+                        {% if user.is_authenticated and user.prenom %}
+                            {{ user.prenom }}
+                        {% else %}
+                            Votre Prénom
+                        {% endif %}
+                    </h1>
+                    <div class="profil-url" id="profil-url">
+                        linkapp/
+                        {% if user.is_authenticated and user.prenom %}
+                            {{ user.prenom|lower }}
+                        {% else %}
+                            votreprenom
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="profil-content">
+                    <h2 class="section-title">Informations générales</h2>
+                    
+                    <form id="profil-form" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="prenom-input">Prénom *</label>
+                            <input type="text" id="prenom-input" name="nom_profil" 
+                                   value="{% if user.is_authenticated and user.prenom %}{{ user.prenom }}{% endif %}" 
+                                   placeholder="Entrez votre prénom" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description-input">Description courte</label>
+                            <textarea id="description-input" name="description" 
+                                      placeholder="Décrivez-vous en quelques mots...">{% if profil.description %}{{ profil.description }}{% endif %}</textarea>
+                        </div>
+
+                        <button type="submit" class="btn" id="save-profil">
+                            <i class="fas fa-save"></i> Enregistrer le profil
+                        </button>
+                    </form>
+                    
+                    <div class="divider"></div>
+                    
+                    <div class="info-grid">
+                        <div class="info-label">Nom du profil</div>
+                        <div class="info-value" id="profil-nom-complet">
+                            {% if user.is_authenticated and user.prenom %}
+                                {{ user.prenom }}
+                            {% else %}
+                                Votre Prénom
+                            {% endif %}
+                        </div>
+                        
+                        <div class="info-label">Description courte</div>
+                        <div class="info-value" id="profil-description">
+                            {% if profil.description %}
+                                {{ profil.description }}
+                            {% else %}
+                                Aucune description
+                            {% endif %}
+                        </div>
+                        
+                        <div class="info-label">Statut</div>
+                        <div class="info-value">
+                            <span class="status-badge">
+                                <i class="fas fa-check-circle"></i>
+                                Le profil est activé
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="divider"></div>
+                    
+                    <div class="alias-section">
+                        <div class="alias-label">Alias</div>
+                        <div class="alias-value" id="profil-alias">
+                            @
+                            {% if user.is_authenticated and user.prenom %}
+                                {{ user.prenom|lower }}
+                            {% else %}
+                                votreprenom
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Liens -->
+        <div id="liens" class="section-content">
+            <h2 class="section-title">Gérer les Liens</h2>
+            
+            <div class="links-container">
+                <div class="links-header">
+                    <span>Mes Liens</span>
+                    <button class="links-btn links-btn-primary" onclick="showAddLinkForm()">
+                        <i class="fas fa-plus"></i> Ajouter un lien
+                    </button>
+                </div>
+                
+                <div id="noLinksMessage" class="no-links">
+                    <h3>Aucun lien à afficher</h3>
+                    <p>Commencez par ajouter votre premier lien</p>
+                    <div class="links-actions">
+                        <button class="links-btn links-btn-primary" onclick="showAddLinkForm()">
+                            <i class="fas fa-plus"></i> Ajouter un lien
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="linksList" class="links-list" style="display: none;">
+                    <!-- Les liens seront ajoutés dynamiquement ici -->
+                </div>
+                
+                <div id="addLinkForm" class="form-container">
+                    <h3 class="form-title" id="formTitle">
+                        <i class="fas fa-plus-circle"></i> Ajouter un nouveau lien
+                    </h3>
+                    
+                    <div class="links-form-group">
+                        <label for="linkTitle">Titre du lien</label>
+                        <input type="text" id="linkTitle" class="links-form-control" placeholder="Ex: Mon Instagram" maxlength="100">
+                    </div>
+                    
+                    <div class="links-form-group">
+                        <label for="linkUrl">Url/Tel/Gmail</label>
+                        <input type="url" id="linkUrl" class="links-form-control" placeholder="https://..." oninput="updateSocialPreview()">
+                    </div>
+                    
+                    <div id="socialPreview" class="social-preview" style="display: none;">
+                        <div id="previewLogo" class="social-preview-logo default">
+                            <i class="fas fa-link"></i>
+                        </div>
+                        <div class="social-preview-text">
+                            <div id="previewTitle" class="social-preview-title">Titre du lien</div>
+                            <div id="previewUrl" class="social-preview-url">URL du lien</div>
+                        </div>
+                    </div>
+                    
+                    <div class="links-form-row">
+                        <div class="links-form-group">
+                            <label for="linkType">Type de lien</label>
+                            <input type="text" id="linkType" class="links-form-control" placeholder="Ex: Réseau social" maxlength="100">
+                        </div>
+                        
+                        <div class="links-form-group">
+                            <label for="linkOrder">Ordre d'affichage</label>
+                            <input type="number" id="linkOrder" class="links-form-control" min="1" value="1">
+                        </div>
+                    </div>
+                    
+                    <div class="links-form-group">
+                        <label for="linkGroup">Groupe</label>
+                        <select id="linkGroup" class="links-form-control">
+                            {% for groupe in groupes %}
+                                <option value="{{ groupe.id }}">{{ groupe.nom_groupe }}</option>
+                            {% empty %}
+                                <option value="1">Groupe Principal</option>
+                                <option value="2">Réseaux Sociaux</option>
+                                <option value="3">Ressources</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="links-form-group">
+                        <label>
+                            <input type="checkbox" id="linkActive" checked>
+                            Lien actif
+                        </label>
+                    </div>
+                    
+                    <div class="links-form-actions">
+                        <button class="links-btn links-btn-cancel" onclick="hideAddLinkForm()">
+                            <i class="fas fa-times"></i> Annuler
+                        </button>
+                        <button class="links-btn links-btn-primary" onclick="saveLink()">
+                            <i class="fas fa-save"></i> Enregistrer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Partager améliorée -->
+        <div id="partager" class="section-content">
+            <h2 class="section-title">Partager votre Profil</h2>
+            
+            <div class="share-section">
+                <div class="share-input-group">
+                    <input type="text" id="text" name="url" placeholder="Entrez votre lien" 
+                           value="linkapp/{% if user.is_authenticated and user.prenom %}{{ user.prenom|lower }}{% else %}votreprenom{% endif %}">
+                    <button name="affi" onclick="afficherTexte()">
+                        <i class="fas fa-eye"></i> Afficher
+                    </button>
+                </div>
+                
+                <p id="resultat" class="url-display"></p>
+                
+                <div class="share-actions">
+                    <button onclick="generateQRCode()">
+                        <i class="fas fa-qrcode"></i> Créer code QR du lien
+                    </button>
+                    <button id="copie" onclick="copierInput()">
+                        <i class="far fa-copy"></i> Copier mon lien
+                    </button>
+                </div>
+                
+                <div class="qrcode-container">
+                    <div id="qrcode"></div>
+                    <p id="lienQR"></p>
+                    
+                    <div class="share-actions">
+                        <button id="downloadBtn" onclick="telechargerQR()">
+                            <i class="fas fa-download"></i> Télécharger le QR Code
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Aperçu avec la carte de contact -->
+        <div id="apercu" class="section-content">
+           
+            
+            <!-- Contact Card Container -->
+            <div class="contact-card">
+                <!-- Header Background Image Area -->
+                <div class="card-header">
+                    {% if user.profils.first.image_profil %}
+                        <img id="background-image" class="background-img" src="{{ user.profils.first.image_profil.url }}" alt="Image de profil de {{ user.prenom }}">
+                    {% else %}
+                        <img id="background-image" class="background-img" src="https://via.placeholder.com/400x300/6C63FF/FFFFFF?text={{ user.prenom|default:'Profil' }}" alt="Image de fond par défaut">
+                    {% endif %}
+                    
+                    <div class="smoke-overlay"></div>
+                </div>
+                
+                <!-- Card Content -->
+                <div class="contact-card-content">
+                    <!-- Name, Title, and Company Section -->
+                    <div class="contact-header">
+                        <!-- Profile Photo -->
+                        <img id="preview-avatar" 
+     src="{% if user.profils.first.image_profil %}{{ user.profils.first.image_profil.url }}{% else %}https://via.placeholder.com/64/6C63FF/FFFFFF?text={{ user.prenom|first|upper }}{% endif %}" 
+     alt="Photo de profil de {{ user.prenom }}" 
+     class="contact-avatar">
+                        
+                        <div class="contact-info">
+                            <!-- Name and Verification -->
+                            <h1 class="contact-name" id="preview-name">
+                                {% if user.is_authenticated and user.prenom %}
+                                    {{ user.prenom }}
+                                {% else %}
+                                    Votre Prénom
+                                {% endif %}
+                                <!-- Verification Checkmark -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 4px;">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <path d="m9 11 3 3L22 4"/>
+                                </svg>
+                            </h1>
+                            <!-- Title and Status -->
+                            <p class="contact-title" id="preview-title">
+                                {% if profil.description %}
+                                    {{ profil.description }}
+                                {% else %}
+                                    Votre description
+                                {% endif %}
+                            </p>
+                            <p class="contact-company" id="preview-company">
+                                {% if user.is_authenticated and user.prenom %}
+                                    {{ user.prenom }}
+                                {% else %}
+                                    Votre entreprise
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Primary Action Button with Loading Dots -->
+                    <button id="saveContactButton" onclick="simulateSaveContact()" class="contact-button">
+                        <span id="buttonText">Sauvegarder le Contact</span>
+                        <span id="loadingIndicator" class="loading-dots hidden">
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                        </span>
+                    </button>
+
+                    <!-- Dynamic Contact Links -->
+                    <div class="contact-links" id="preview-links">
+                        <!-- Les liens seront chargés dynamiquement ici -->
+                        <div style="text-align: center; padding: 16px 0;">
+                            <p style="color: #666; font-style: italic;">Aucun lien disponible pour le moment</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- FOOTER: Subtle branding and copyright section -->
+                <div class="contact-footer">
+                    <p class="footer-text">© {% now "Y" %} <span id="preview-footer-name">
+                        {% if user.is_authenticated and user.prenom %}
+                            {{ user.prenom }}
+                        {% else %}
+                            Votre Prénom
+                        {% endif %}
+                    </span> | Carte Digitale</p>
+                    <p class="footer-brand">
+                        Propulsé par <span style="color: #1a73e8; font-weight: 600;">vCard Pro</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">      
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>LinkApp</h3>
+                    <p>La plateforme de liaison professionnelle qui simplifie vos collaborations et optimise votre réseau.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Liens rapides</h3>
+                    <ul class="footer-links">
+                        <li><a href="{% url 'home' %}"><i class="fas fa-chevron-right"></i> Accueil</a></li>
+                        <li><a href="{% url 'about' %}"><i class="fas fa-chevron-right"></i> À propos</a></li>
+                        <li><a href="{% url 'contact' %}"><i class="fas fa-chevron-right"></i> Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Centre d'aide</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> FAQ</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Confidentialité</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Conditions d'utilisation</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2025 LinkApp. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Feedback de copie -->
+    <div id="copyFeedback" class="copy-feedback">
+        <i class="fas fa-check-circle"></i> Lien copié dans le presse-papier !
+    </div>
+
+    <script>
+        // Données de démonstration
+        let links = [];
+        let editingLinkId = null;
+        let draggedItem = null;
+        let currentQRCode = null;
+        
+        // Mapping des réseaux sociaux avec leurs logos
+        const socialNetworks = {
+            'facebook.com': { name: 'Facebook', icon: 'fab fa-facebook-f', color: 'facebook' },
+            'twitter.com': { name: 'Twitter', icon: 'fab fa-twitter', color: 'twitter' },
+            'x.com': { name: 'X', icon: 'fab fa-twitter', color: 'twitter' },
+            'instagram.com': { name: 'Instagram', icon: 'fab fa-instagram', color: 'instagram' },
+            'linkedin.com': { name: 'LinkedIn', icon: 'fab fa-linkedin-in', color: 'linkedin' },
+            'youtube.com': { name: 'YouTube', icon: 'fab fa-youtube', color: 'youtube' },
+            'tiktok.com': { name: 'TikTok', icon: 'fab fa-tiktok', color: 'tiktok' },
+            'whatsapp.com': { name: 'WhatsApp', icon: 'fab fa-whatsapp', color: 'whatsapp' },
+            'pinterest.com': { name: 'Pinterest', icon: 'fab fa-pinterest-p', color: 'pinterest' },
+            'snapchat.com': { name: 'Snapchat', icon: 'fab fa-snapchat-ghost', color: 'snapchat' },
+            'reddit.com': { name: 'Reddit', icon: 'fab fa-reddit-alien', color: 'reddit' },
+            'discord.com': { name: 'Discord', icon: 'fab fa-discord', color: 'discord' },
+            'discord.gg': { name: 'Discord', icon: 'fab fa-discord', color: 'discord' },
+            'telegram.org': { name: 'Telegram', icon: 'fab fa-telegram', color: 'telegram' },
+            't.me': { name: 'Telegram', icon: 'fab fa-telegram', color: 'telegram' },
+            'github.com': { name: 'GitHub', icon: 'fab fa-github', color: 'github' },
+            'gmail.com': { name: 'Gmail', icon: 'fas fa-envelope', color: 'gmail' },
+            'mailto:': { name: 'Email', icon: 'fas fa-envelope', color: 'gmail' },
+            'tel:': { name: 'Téléphone', icon: 'fas fa-phone', color: 'phone' }
+            
+        };
+        
+        // Gestion du menu de déconnexion
+        document.addEventListener('DOMContentLoaded', function() {
+            const userAvatar = document.getElementById('user-avatar');
+            const logoutMenu = document.getElementById('logoutMenu');
+            
+            if (userAvatar && logoutMenu) {
+                userAvatar.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    logoutMenu.classList.toggle('show');
+                });
+                
+                // Fermer le menu si on clique ailleurs
+                document.addEventListener('click', function() {
+                    logoutMenu.classList.remove('show');
+                });
+            }
+            
+            // Gestion du menu hamburger mobile
+            const hamburgerMenu = document.getElementById('hamburgerMenu');
+            const mobileNav = document.getElementById('mobileNav');
+            const closeMenu = document.getElementById('closeMenu');
+            const overlay = document.getElementById('overlay');
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+            
+            if (hamburgerMenu && mobileNav) {
+                hamburgerMenu.addEventListener('click', function() {
+                    mobileNav.classList.add('active');
+                    overlay.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
+                
+                closeMenu.addEventListener('click', function() {
+                    mobileNav.classList.remove('active');
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+                
+                overlay.addEventListener('click', function() {
+                    mobileNav.classList.remove('active');
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+                
+                // Navigation depuis le menu mobile
+                mobileNavLinks.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const sectionId = this.getAttribute('data-section');
+                        showSection(sectionId);
+                        
+                        // Fermer le menu mobile
+                        mobileNav.classList.remove('active');
+                        overlay.classList.remove('active');
+                        document.body.style.overflow = '';
+                    });
+                });
+            }
+        });
+        
+        // Fonction de déconnexion
+        function logout() {
+            if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+                window.location.href = "{% url 'deconnexion' %}";
+            }
+        }
+        
+        // Détecter le réseau social à partir de l'URL
+        function detectSocialNetwork(url) {
+            try {
+                // Vérifier d'abord les URLs spéciales (mailto et tel)
+                if (url.startsWith('mailto:')) {
+                    return { name: 'Gmail', icon: 'fas fa-envelope', color: 'gmail' };
+                }
+                if (url.startsWith('tel:')) {
+                    return { name: 'Téléphone', icon: 'fas fa-phone', color: 'phone' };
+                }
+                
+                const domain = new URL(url).hostname.replace('www.', '');
+                for (const [key, value] of Object.entries(socialNetworks)) {
+                    if (domain.includes(key)) {
+                        return value;
+                    }
+                }
+            } catch (e) {
+                // URL invalide - vérifier si c'est un numéro de téléphone
+                if (url.match(/^[\+]?[0-9\s\-\(\)]{10,}$/)) {
+                    return { name: 'Téléphone', icon: 'fas fa-phone', color: 'phone' };
+                }
+                // Vérifier si c'est un email
+                if (url.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                    return { name: 'Email', icon: 'fas fa-envelope', color: 'gmail' };
+                }
+            }
+            return { name: 'Lien', icon: 'fas fa-link', color: 'default' };
+        }
+        
+        // Mettre à jour l'aperçu du réseau social
+        function updateSocialPreview() {
+            const url = document.getElementById('linkUrl').value;
+            const title = document.getElementById('linkTitle').value || 'Titre du lien';
+            
+            if (url) {
+                const social = detectSocialNetwork(url);
+                document.getElementById('previewLogo').className = `social-preview-logo ${social.color}`;
+                document.getElementById('previewLogo').innerHTML = `<i class="${social.icon}"></i>`;
+                document.getElementById('previewTitle').textContent = title;
+                document.getElementById('previewUrl').textContent = url;
+                document.getElementById('socialPreview').style.display = 'flex';
+            } else {
+                document.getElementById('socialPreview').style.display = 'none';
+            }
+        }
+        
+        // Afficher le formulaire d'ajout de lien
+        function showAddLinkForm() {
+            document.getElementById('noLinksMessage').style.display = 'none';
+            document.getElementById('linksList').style.display = 'none';
+            document.getElementById('addLinkForm').style.display = 'block';
+            document.getElementById('formTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Ajouter un nouveau lien';
+            
+            // Réinitialiser le formulaire
+            document.getElementById('linkTitle').value = '';
+            document.getElementById('linkUrl').value = '';
+            document.getElementById('linkType').value = '';
+            document.getElementById('linkOrder').value = links.length + 1;
+            document.getElementById('linkActive').checked = true;
+            document.getElementById('socialPreview').style.display = 'none';
+            
+            editingLinkId = null;
+        }
+        
+        // Masquer le formulaire
+        function hideAddLinkForm() {
+            document.getElementById('addLinkForm').style.display = 'none';
+            
+            if (links.length > 0) {
+                document.getElementById('linksList').style.display = 'flex';
+            } else {
+                document.getElementById('noLinksMessage').style.display = 'block';
+            }
+        }
+        
+        // Sauvegarder un lien
+        async function saveLink() {
+            const title = document.getElementById('linkTitle').value;
+            const url = document.getElementById('linkUrl').value;
+            const type = document.getElementById('linkType').value;
+            const order = parseInt(document.getElementById('linkOrder').value);
+            const groupeId = document.getElementById('linkGroup').value;
+            const active = document.getElementById('linkActive').checked;
+            
+            if (!title || !url || !type || !order || !groupeId) {
+                alert('Veuillez remplir tous les champs obligatoires');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/liens/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({
+                        id: editingLinkId,
+                        titre: title,
+                        url: url,
+                        type_lien: type,
+                        ordre_affichage: order,
+                        groupe: groupeId,
+                        est_actif: active
+                    })
+                });
+                
+                if (response.ok) {
+                    const savedLink = await response.json();
+                    
+                    if (editingLinkId) {
+                        // Mettre à jour le lien existant
+                        const linkIndex = links.findIndex(link => link.id === editingLinkId);
+                        if (linkIndex !== -1) {
+                            links[linkIndex] = savedLink;
+                        }
+                    } else {
+                        // Ajouter le nouveau lien
+                        links.push(savedLink);
+                    }
+                    
+                    updateLinksDisplay();
+                    updatePreviewLinks();
+                    hideAddLinkForm();
+                    showMessage('Lien enregistré avec succès!', 'success');
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Erreur lors de la sauvegarde');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Erreur lors de la sauvegarde du lien: ' + error.message, 'error');
+            }
+        }
+        
+        // Modifier un lien
+        function editLink(id) {
+            const link = links.find(link => link.id === id);
+            if (link) {
+                document.getElementById('linkTitle').value = link.titre;
+                document.getElementById('linkUrl').value = link.url;
+                document.getElementById('linkType').value = link.type_lien;
+                document.getElementById('linkOrder').value = link.ordre_affichage;
+                document.getElementById('linkGroup').value = link.groupe;
+                document.getElementById('linkActive').checked = link.est_actif;
+                
+                document.getElementById('formTitle').innerHTML = '<i class="fas fa-edit"></i> Modifier le lien';
+                document.getElementById('addLinkForm').style.display = 'block';
+                document.getElementById('linksList').style.display = 'none';
+                
+                updateSocialPreview();
+                editingLinkId = id;
+            }
+        }
+        
+        // Supprimer un lien
+        async function deleteLink(id) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce lien ?')) {
+                try {
+                    const response = await fetch(`/api/liens/${id}/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRFToken': getCsrfToken()
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        links = links.filter(link => link.id !== id);
+                        updateLinksDisplay();
+                        updatePreviewLinks();
+                        showMessage('Lien supprimé avec succès!', 'success');
+                    } else {
+                        throw new Error('Erreur lors de la suppression');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showMessage('Erreur lors de la suppression du lien', 'error');
+                }
+            }
+        }
+        
+        // Mettre à jour l'affichage des liens
+        function updateLinksDisplay() {
+            const linksList = document.getElementById('linksList');
+            linksList.innerHTML = '';
+            
+            if (links.length === 0) {
+                document.getElementById('noLinksMessage').style.display = 'block';
+                document.getElementById('linksList').style.display = 'none';
+                return;
+            }
+            
+            // Trier les liens par ordre d'affichage
+            links.sort((a, b) => a.ordre_affichage - b.ordre_affichage);
+            
+            // Ajouter chaque lien à la liste
+            links.forEach(link => {
+                const social = detectSocialNetwork(link.url);
+                
+                const linkItem = document.createElement('div');
+                linkItem.className = 'link-item';
+                linkItem.draggable = true;
+                linkItem.dataset.id = link.id;
+                
+                linkItem.innerHTML = `
+                    <div class="link-logo ${social.color}">
+                        <i class="${social.icon}"></i>
+                    </div>
+                    <div class="link-content">
+                        <div class="link-title">${link.titre}</div>
+                        <div class="link-url">${link.url}</div>
+                    </div>
+                    <div class="link-actions">
+                        <button class="btn-icon btn-edit" onclick="editLink(${link.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-icon btn-delete" onclick="deleteLink(${link.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                // Événements de glisser-déposer
+                linkItem.addEventListener('dragstart', handleDragStart);
+                linkItem.addEventListener('dragover', handleDragOver);
+                linkItem.addEventListener('drop', handleDrop);
+                linkItem.addEventListener('dragend', handleDragEnd);
+                
+                linksList.appendChild(linkItem);
+            });
+            
+            document.getElementById('noLinksMessage').style.display = 'none';
+            document.getElementById('linksList').style.display = 'flex';
+        }
+        
+        // Gestion du glisser-déposer
+        function handleDragStart(e) {
+            draggedItem = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+        }
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+        
+        function handleDrop(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            
+            if (draggedItem !== this) {
+                // Échanger les positions dans le tableau
+                const draggedId = parseInt(draggedItem.dataset.id);
+                const targetId = parseInt(this.dataset.id);
+                
+                const draggedIndex = links.findIndex(link => link.id === draggedId);
+                const targetIndex = links.findIndex(link => link.id === targetId);
+                
+                // Échanger les ordres d'affichage
+                const tempOrder = links[draggedIndex].ordre_affichage;
+                links[draggedIndex].ordre_affichage = links[targetIndex].ordre_affichage;
+                links[targetIndex].ordre_affichage = tempOrder;
+                
+                // Sauvegarder les nouveaux ordres
+                updateLinkOrder(draggedId, links[draggedIndex].ordre_affichage);
+                updateLinkOrder(targetId, links[targetIndex].ordre_affichage);
+                
+                // Mettre à jour l'affichage
+                updateLinksDisplay();
+                updatePreviewLinks();
+            }
+            
+            return false;
+        }
+        
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+        }
+        
+        // Mettre à jour l'ordre des liens après drag & drop
+        async function updateLinkOrder(linkId, newOrder) {
+            try {
+                const response = await fetch(`/api/liens/${linkId}/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({
+                        ordre_affichage: newOrder
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la mise à jour de l\'ordre');
+                }
+            } catch (error) {
+                console.error('Error updating order:', error);
+                showMessage('Erreur lors de la réorganisation des liens', 'error');
+            }
+        }
+        
+        // Fonction pour charger et afficher les liens dans l'aperçu
+        async function loadAndDisplayLinksInPreview() {
+            try {
+                const response = await fetch('/api/liens/');
+                if (response.ok) {
+                    const links = await response.json();
+                    updatePreviewLinks(links);
+                } else {
+                    console.error('Erreur lors du chargement des liens pour l\'aperçu');
+                updatePreviewLinks([]);
+                }
+            } catch (error) {
+                console.error('Error loading links for preview:', error);
+                updatePreviewLinks([]);
+            }
+        }
+        
+        // Fonction pour mettre à jour l'affichage des liens dans l'aperçu
+        function updatePreviewLinks(links = null) {
+            const previewLinksContainer = document.getElementById('preview-links');
+            const linksToDisplay = links !== null ? links : window.links;
+            
+            previewLinksContainer.innerHTML = '';
+            
+            if (!linksToDisplay || linksToDisplay.length === 0) {
+                previewLinksContainer.innerHTML = `
+                    <div style="text-align: center; padding: 16px 0;">
+                        <p style="color: #666; font-style: italic;">Aucun lien disponible pour le moment</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Trier les liens par ordre d'affichage
+            const sortedLinks = [...linksToDisplay].sort((a, b) => a.ordre_affichage - b.ordre_affichage);
+            
+            // Ajouter chaque lien à l'aperçu
+            sortedLinks.forEach(link => {
+                if (!link.est_actif) return; // Ne pas afficher les liens inactifs
+                
+                const social = detectSocialNetwork(link.url);
+                
+                const linkElement = document.createElement('a');
+                linkElement.href = link.url;
+                linkElement.className = 'contact-link';
+                linkElement.target = '_blank';
+                
+                // Déterminer la classe CSS pour l'icône en fonction du type de lien
+                let iconClass = 'default';
+                if (link.url.includes('mailto:') || link.type_lien.toLowerCase().includes('email')) {
+                    iconClass = 'email';
+                } else if (link.url.includes('tel:') || link.type_lien.toLowerCase().includes('phone')) {
+                    iconClass = 'phone';
+                } else if (link.url.includes('linkedin.com') || link.type_lien.toLowerCase().includes('linkedin')) {
+                    iconClass = 'linkedin';
+                } else if (link.url.includes('calendly.com') || link.type_lien.toLowerCase().includes('meeting')) {
+                    iconClass = 'calendly';
+                }
+                
+                linkElement.innerHTML = `
+                    <div class="icon-box ${iconClass}" style="margin-right: 16px;">
+                        ${getSocialIcon(social, link)}
+                    </div>
+                    <div class="link-info">
+                        <p class="link-title">${link.titre}</p>
+                        <p class="link-type">
+                            ${link.type_lien || 'Cliquez pour visiter'}
+                        </p>
+                    </div>
+                `;
+                
+                previewLinksContainer.appendChild(linkElement);
+            });
+        }
+        
+        // Fonction utilitaire pour obtenir l'icône SVG appropriée
+        function getSocialIcon(social, link) {
+            if (social.name === 'Email' || link.url.includes('mailto:')) {
+                return `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                    </svg>
+                `;
+            } else if (social.name === 'Téléphone' || link.url.includes('tel:')) {
+                return `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34A853" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                    </svg>
+                `;
+            } else if (social.name === 'LinkedIn' || link.url.includes('linkedin.com')) {
+                return `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0A66C2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="fill-current">
+                        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
+                    </svg>
+                `;
+            } else if (social.name === 'Calendly' || link.type_lien.toLowerCase().includes('meeting')) {
+                return `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                `;
+            } else {
+                return `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                    </svg>
+                `;
+            }
+        }
+        
+        // Charger les liens depuis la base de données
+        async function loadLinks() {
+            try {
+                const response = await fetch('/api/liens/');
+                if (response.ok) {
+                    links = await response.json();
+                    updateLinksDisplay();
+                    updatePreviewLinks();
+                } else {
+                    throw new Error('Erreur lors du chargement des liens');
+                }
+            } catch (error) {
+                console.error('Error loading links:', error);
+                showMessage('Erreur lors du chargement des liens', 'error');
+            }
+        }
+        
+        // Fonction utilitaire pour récupérer le token CSRF
+        function getCsrfToken() {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+            return csrfToken ? csrfToken.value : '';
+        }
+        
+        // Fonction pour afficher un message
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            if (messageDiv) {
+                messageDiv.textContent = text;
+                messageDiv.className = `message ${type}`;
+                messageDiv.style.display = 'block';
+                
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        // Fonctions pour la section Partager
+        function afficherTexte() {
+            var texteSaisi = document.getElementById("text").value;
+            document.getElementById("resultat").innerText = texteSaisi;
+        }
+
+        function copierInput() {
+            var inputElement = document.getElementById("text");
+            inputElement.select();
+            inputElement.setSelectionRange(0, 99999);
+            
+            navigator.clipboard.writeText(inputElement.value).then(() => {
+                showCopyFeedback();
+            }).catch(err => {
+                // Fallback pour les navigateurs plus anciens
+                document.execCommand("copy");
+                showCopyFeedback();
+            });
+        }
+
+        function generateQRCode() {
+            var qrContainer = document.getElementById("qrcode");
+            qrContainer.innerHTML = "";
+            var text = document.getElementById("text").value;
+            
+            if (text.trim().length === 0) {
+                alert("Veuillez entrer une URL");
+                return;
+            }
+            
+            currentQRCode = new QRCode(qrContainer, {
+                text: text,
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            
+            document.getElementById("lienQR").innerText = text;
+        }
+
+        function telechargerQR() {
+            if (!currentQRCode) {
+                alert("Veuillez d'abord générer un QR Code");
+                return;
+            }
+            
+            var qrImage = document.querySelector("#qrcode img");
+            if (qrImage) {
+                var downloadLink = document.createElement("a");
+                downloadLink.href = qrImage.src;
+                downloadLink.download = "qrcode-linkapp.png";
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            } else {
+                alert("Aucun QR Code à télécharger");
+            }
+        }
+
+        function showCopyFeedback() {
+            const feedback = document.getElementById('copyFeedback');
+            feedback.classList.add('show');
+            
+            setTimeout(() => {
+                feedback.classList.remove('show');
+            }, 3000);
+        }
+
+        // Fonctions pour la carte de contact
+        // Function to simulate saving contact and show loading dots
+        function simulateSaveContact() {
+            const buttonText = document.getElementById('buttonText');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const button = document.getElementById('saveContactButton');
+            
+            const originalText = buttonText.textContent;
+            
+            // 1. Show loading state
+            buttonText.classList.add('hidden');
+            loadingIndicator.classList.remove('hidden');
+            button.disabled = true;
+            
+            // 2. Simulate network delay (2 seconds)
+            setTimeout(() => {
+                // 3. Hide loading state and reset button
+                loadingIndicator.classList.add('hidden');
+                buttonText.classList.remove('hidden');
+                button.disabled = false;
+                
+                // 4. Briefly show 'Sauvegardé!' feedback
+                buttonText.textContent = 'Sauvegardé!';
+                button.style.backgroundColor = '#34A853';
+
+                setTimeout(() => {
+                     // 5. Reset to original state
+                     buttonText.textContent = originalText;
+                     button.style.backgroundColor = '#000';
+                }, 1500);
+
+            }, 2000); 
+        }
+        
+        // Fonction pour afficher une section
+        function showSection(sectionId) {
+            // Masquer toutes les sections
+            const sections = document.querySelectorAll('.section-content');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Afficher la section demandée
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+            
+            // Mettre à jour la navigation active
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                if (link.getAttribute('data-section') === sectionId) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+            
+            // Mettre à jour la navigation mobile active
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+            mobileNavLinks.forEach(link => {
+                if (link.getAttribute('data-section') === sectionId) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+            
+            // Si on affiche la section aperçu, recharger les liens
+            if (sectionId === 'apercu') {
+                loadAndDisplayLinksInPreview();
+            }
+        }
+        
+        // Initialiser l'interface
+        document.addEventListener('DOMContentLoaded', function() {
+            // Charger les liens depuis la base de données
+            loadLinks();
+            
+            // Navigation entre les sections
+            const navLinks = document.querySelectorAll('.nav-link');
+            const actionCards = document.querySelectorAll('.action-card');
+            
+            // Éléments du profil
+            const prenomInput = document.getElementById('prenom-input');
+            const descriptionInput = document.getElementById('description-input');
+            const profilForm = document.getElementById('profil-form');
+            const avatarUpload = document.getElementById('avatar-upload');
+            const profilAvatar = document.getElementById('profil-avatar');
+            const userAvatar = document.getElementById('user-avatar');
+            const messageDiv = document.getElementById('message');
+            
+            // Fonction pour mettre à jour l'affichage du profil
+            function mettreAJourProfil() {
+                const prenom = prenomInput.value.trim() || 'Votre Prénom';
+                const description = descriptionInput.value.trim() || 'Aucune description';
+                
+                // Mettre à jour le nom
+                document.getElementById('profil-nom').textContent = prenom;
+                document.getElementById('profil-nom-complet').textContent = prenom;
+                document.getElementById('preview-name').textContent = prenom;
+                document.getElementById('preview-footer-name').textContent = prenom;
+                
+                // Mettre à jour l'URL
+                document.getElementById('profil-url').textContent = `linkapp/${prenom.toLowerCase()}`;
+                
+                // Mettre à jour la description
+                document.getElementById('profil-description').textContent = description;
+                document.getElementById('preview-title').textContent = description;
+                
+                // Mettre à jour l'alias
+                document.getElementById('profil-alias').textContent = `@${prenom.toLowerCase()}`;
+                
+                // Mettre à jour l'avatar dans la navbar
+                userAvatar.textContent = prenom.charAt(0).toUpperCase();
+                userAvatar.innerHTML = ''; // Enlever l'icône si elle existe
+                
+                // Mettre à jour l'entreprise
+                document.getElementById('preview-company').textContent = prenom;
+            }
+            
+            // Gestion de l'upload de photo
+            profilAvatar.addEventListener('click', function() {
+                avatarUpload.click();
+            });
+            
+            avatarUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const imageUrl = e.target.result;
+                        profilAvatar.style.backgroundImage = `url(${imageUrl})`;
+                        profilAvatar.innerHTML = '';
+                        userAvatar.style.backgroundImage = `url(${imageUrl})`;
+                        userAvatar.innerHTML = '';
+                        document.getElementById('preview-avatar').src = imageUrl;
+                        document.getElementById('background-image').src = imageUrl;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Sauvegarde du profil via formulaire Django
+            profilForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (!prenomInput.value.trim()) {
+                    showMessage('Veuillez entrer votre prénom', 'error');
+                    prenomInput.focus();
+                    return;
+                }
+                
+                const formData = new FormData(this);
+                
+                // Ajouter l'image si elle a été sélectionnée
+                if (avatarUpload.files[0]) {
+                    formData.append('image_profil', avatarUpload.files[0]);
+                }
+                
+                // Désactiver le bouton pendant l'envoi
+                const saveButton = document.getElementById('save-profil');
+                saveButton.disabled = true;
+                saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
+                
+                // Envoyer les données au serveur
+                fetch('{% url "sauvegarder_profil" %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': getCsrfToken()
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('Profil enregistré avec succès !', 'success');
+                        mettreAJourProfil();
+                    } else {
+                        showMessage(data.error || 'Erreur lors de l\'enregistrement', 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage('Erreur de connexion', 'error');
+                    console.error('Error:', error);
+                })
+                .finally(() => {
+                    saveButton.disabled = false;
+                    saveButton.innerHTML = '<i class="fas fa-save"></i> Enregistrer le profil';
+                });
+            });
+            
+            // Mise à jour en temps réel de l'affichage
+            prenomInput.addEventListener('input', mettreAJourProfil);
+            descriptionInput.addEventListener('input', mettreAJourProfil);
+            
+            // Écouteurs d'événements pour les liens de navigation
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const sectionId = this.getAttribute('data-section');
+                    showSection(sectionId);
+                });
+            });
+            
+            // Écouteurs d'événements pour les cartes d'action
+            actionCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const sectionId = this.getAttribute('data-section');
+                    showSection(sectionId);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
