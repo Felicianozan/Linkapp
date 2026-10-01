@@ -34,7 +34,7 @@ Le projet a été réalisé avec Django et permet de mettre en pratique le déve
 
 Pour exécuter le projet, vous devez disposer de :
 
-* Python 3.x
+* Python 3.11
 * pip
 * Git
 
